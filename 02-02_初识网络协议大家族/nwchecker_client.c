@@ -3,11 +3,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <sys/socket.h>
 #include <arpa/inet.h> // inet_addr()
-//#include <sys/types.h>
-//#include <netinet/in.h>
 
 int main(int argc, char *argv[])
 {
@@ -27,10 +26,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    const char *serverip = argv[1];
-    unsigned short serverport = atoi(argv[2]);
-        
-
     sock_fd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_fd == -1){
         printf("Create socket failed! errno(%d)\n", errno);
@@ -40,8 +35,8 @@ int main(int argc, char *argv[])
     memset(&serveraddr, 0, sizeof(serveraddr));
 
     serveraddr.sin_family = AF_INET;
-    serveraddr.sin_port = htons(serverport);
-    serveraddr.sin_addr.s_addr = inet_addr(serverip);
+    serveraddr.sin_port = htons(atoi(argv[2]));
+    serveraddr.sin_addr.s_addr = inet_addr(argv[1]);
 
     rc = connect(sock_fd, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
     if (rc == -1){
@@ -56,7 +51,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("Send %s to server!\n", ping);
+        printf("%u Send %s to server!\n", time(NULL), ping);
 
         rc = recv(sock_fd, recv_buffer, 7, 0);
         if (rc == 0){
@@ -69,11 +64,13 @@ int main(int argc, char *argv[])
             break;
         }
         
-        printf("Recv %s from the server\n", recv_buffer);
+        printf("%u Recv %s from the server\n", time(NULL), recv_buffer);
 
         // Sleep 3 seconds
         sleep(3);
     }
+
+    close(sock_fd);
 
     return 0;
 }

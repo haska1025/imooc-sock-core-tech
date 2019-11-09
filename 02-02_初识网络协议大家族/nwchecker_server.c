@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <sys/socket.h>
 #include <arpa/inet.h> // inet_addr()
-//#include <sys/types.h>
-//#include <netinet/in.h>
 
 int main(int argc, char *argv[])
 {
@@ -29,9 +29,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    unsigned short serverport = atoi(argv[1]);
-        
-
     sock_fd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_fd == -1){
         printf("Create socket failed! errno(%d)\n", errno);
@@ -41,7 +38,7 @@ int main(int argc, char *argv[])
     memset(&server_addr, 0, sizeof(server_addr));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(serverport);
+    server_addr.sin_port = htons(atoi(argv[1]));
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
     rc = bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
@@ -74,7 +71,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("Recv %s from the client\n");
+        printf("%u Recv %s from the client\n", time(NULL), recv_buffer);
         
         rc = send(client_sock_fd, pong, pong_len, 0); 
         if (rc == -1){
@@ -82,9 +79,12 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("Send %s to client !\n", recv_buffer);
+        printf("%u Send %s to client !\n", time(NULL), pong);
         
     }
+
+    close(sock_fd);
+    close(client_sock_fd);
 
     return 0;
 }

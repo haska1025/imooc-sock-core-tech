@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("%u Recv %s from the client\n", time(NULL), recv_buffer);
+        printf("%ld Recv %s from the client\n", time(NULL), recv_buffer);
         
         rc = send(client_sock_fd, pong, pong_len, 0); 
         if (rc == -1){
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("%u Send %s to client !\n", time(NULL), pong);
+        printf("%ld Send %s to client !\n", time(NULL), pong);
         
     }
 

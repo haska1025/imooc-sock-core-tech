@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("%u Send %s to server!\n", time(NULL), ping);
+        printf("%ld Send %s to server!\n", time(NULL), ping);
 
         rc = recv(sock_fd, recv_buffer, 7, 0);
         if (rc == 0){
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
             break;
         }
         
-        printf("%u Recv %s from the server\n", time(NULL), recv_buffer);
+        printf("%ld Recv %s from the server\n", time(NULL), recv_buffer);
 
         // Sleep 3 seconds
         sleep(3);

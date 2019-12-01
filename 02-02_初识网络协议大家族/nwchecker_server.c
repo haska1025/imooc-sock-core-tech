@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    memset(&client_addr, 0, sizeof(client_addr));
     memset(&server_addr, 0, sizeof(server_addr));
 
     server_addr.sin_family = AF_INET;
@@ -53,9 +54,11 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    client_addr_len = sizeof(client_addr);
+
     client_sock_fd = accept(sock_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
     if (client_sock_fd == -1){
-        printf("Accept connection from client failed! errno(%d)\n", errno);
+        printf("Accept connection from client failed! sockf_fd(%d) errno(%d)\n", sock_fd, errno);
         return -1;
     }
 

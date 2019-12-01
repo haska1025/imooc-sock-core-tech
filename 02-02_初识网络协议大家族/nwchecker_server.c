@@ -8,7 +8,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h> // inet_addr()
 
-int main(int argc, char *argv[])
+#include "nwchecker.h"
+
+int nwc_server(struct nwc_args na);
 {
     int rc = 0;
     int sock_fd = -1;
@@ -23,12 +25,6 @@ int main(int argc, char *argv[])
     char recv_buffer[8] = {0};
     int client_sock_fd = -1;
 
-
-    if (argc < 2){
-        printf("Please input: nwchecker_server port\n");
-        return -1;
-    }
-
     sock_fd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_fd == -1){
         printf("Create socket failed! errno(%d)\n", errno);
@@ -39,7 +35,7 @@ int main(int argc, char *argv[])
     memset(&server_addr, 0, sizeof(server_addr));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(atoi(argv[1]));
+    server_addr.sin_port = htons(na->port);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
     rc = bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
@@ -58,7 +54,7 @@ int main(int argc, char *argv[])
 
     client_sock_fd = accept(sock_fd, (struct sockaddr*)&client_addr, (socklen_t*)&client_addr_len);
     if (client_sock_fd == -1){
-        printf("Accept connection from client failed! sockf_fd(%d) errno(%d)\n", sock_fd, errno);
+        printf("Accept connection from client failed! errno(%d)\n", errno);
         return -1;
     }
 
@@ -86,8 +82,10 @@ int main(int argc, char *argv[])
         
     }
 
-    close(sock_fd);
-    close(client_sock_fd);
+    if (!na->no_close){
+        close(sock_fd);
+        close(client_sock_fd);
+    }
 
     return 0;
 }

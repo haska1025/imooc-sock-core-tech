@@ -38,14 +38,14 @@ int main(int argc, char *argv[])
             {"help",    no_argument,       0, 'h'},
             {"client",  no_argument,       0, 'c'},
             {"server",  no_argument,       0, 's'},
+            {"no-close", no_argument,      0, 'n'},
             {"port",  required_argument,   0, 'p'},
             {"address", required_argument, 0, 'a'},
             {"count", required_argument,   0, 'u'},
-            {"no-close", no_argument,      0, 'n'},
             {0,         0,                 0,  0 }
         };
 
-        c = getopt_long(argc, argv, "hcsp:a:u:n", long_options, &option_index);
+        c = getopt_long(argc, argv, "hcsnp:a:u:", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
                 break;
             case 'n':
                 na.no_close = 1;
+                break;
             default:
                 usage();
         }

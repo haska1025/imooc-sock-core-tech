@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "nwchecker.h"
 
@@ -59,16 +60,16 @@ int main(int argc, char *argv[])
                 mode =2;
                 break;
             case 'p':
-                na->port = atoi(optarg);
+                na.port = atoi(optarg);
                 break;
             case 'a':
-                na->ip = optarg;
+                na.ip = optarg;
                 break;
             case 'u':
-                na->count = atoi(optarg);
+                na.count = atoi(optarg);
                 break;
             case 'n':
-                na->no_close = 1;
+                na.no_close = 1;
             default:
                 usage();
         }

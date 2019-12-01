@@ -10,7 +10,7 @@
 
 #include "nwchecker.h"
 
-int nwc_server(struct nwc_args na);
+int nwc_server(struct nwc_args *na)
 {
     int rc = 0;
     int sock_fd = -1;

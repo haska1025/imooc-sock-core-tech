@@ -54,7 +54,7 @@ int nwc_client(struct nwc_args *na)
 
         rc = recv(sock_fd, recv_buffer, 7, 0);
         if (rc == 0){
-            printf("The connection is closed by peer!");
+            printf("The connection is closed by peer!\n");
             break;
         }
 

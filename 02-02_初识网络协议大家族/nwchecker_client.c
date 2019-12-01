@@ -8,9 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h> // inet_addr()
 
-#include "nwchecker.h"
-
-int nwc_client(struct nwc_args *na)
+int main(int argc, char *argv[])
 {
     int rc = 0;
     int sock_fd = -1;
@@ -22,6 +20,12 @@ int nwc_client(struct nwc_args *na)
     // Used to receive the "pong" message from the server.
     char recv_buffer[8] = {0};
 
+
+    if (argc < 3){
+        printf("Please input: nwchecker_client ip port\n");
+        return -1;
+    }
+
     sock_fd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sock_fd == -1){
         printf("Create socket failed! errno(%d)\n", errno);
@@ -31,17 +35,14 @@ int nwc_client(struct nwc_args *na)
     memset(&serveraddr, 0, sizeof(serveraddr));
 
     serveraddr.sin_family = AF_INET;
-    serveraddr.sin_port = htons(na->port);
-    serveraddr.sin_addr.s_addr = inet_addr(na->ip);
+    serveraddr.sin_port = htons(atoi(argv[2]));
+    serveraddr.sin_addr.s_addr = inet_addr(argv[1]);
 
     rc = connect(sock_fd, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
     if (rc == -1){
         printf("Connect server failed! errno(%d)\n", errno);
         return -1;
     }
-
-    int infinit = na->count <= 0 ? 1:0;
-    int loop_count = na->count;
 
     while(1){
         rc = send(sock_fd, ping, ping_len, 0); 
@@ -54,7 +55,7 @@ int nwc_client(struct nwc_args *na)
 
         rc = recv(sock_fd, recv_buffer, 7, 0);
         if (rc == 0){
-            printf("The connection is closed by peer!\n");
+            printf("The connection is closed by peer!");
             break;
         }
 
@@ -65,20 +66,11 @@ int nwc_client(struct nwc_args *na)
         
         printf("%ld Recv %s from the server\n", time(NULL), recv_buffer);
 
-        if (!infinit){
-            loop_count--;
-            if (loop_count == 0){
-                break;// exit loop
-            }
-        }
-
         // Sleep 3 seconds
         sleep(3);
     }
 
-    if (!na->no_close){
-        close(sock_fd);
-    }
+    close(sock_fd);
 
     return 0;
 }

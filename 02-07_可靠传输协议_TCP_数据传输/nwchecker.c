@@ -7,9 +7,8 @@
 
 /************** Begin of  util funciton *******************/
 
-char * alloc_buffer(int message_size)
+char * alloc_buffer(int alloc_size)
 {
-    int alloc_size = message_size <= 0?4:message_size;
     char *buff = malloc(alloc_size);
     if (alloc_size <= 5){
         memcpy(buff, "ping", alloc_size);
@@ -41,7 +40,7 @@ void usage()
     fprintf(stderr, "  --interval -i         The send or recv interval.\n");
     fprintf(stderr, "  --send-pkgs -e        The send packages every interval.\n");
     fprintf(stderr, "  --message-size -g     The maximum package size.\n");
-    fprintf(stderr, "  --echo-mode -m        The echo mode for server.1:immediate, 2: random time, 3: no response.\n");
+    fprintf(stderr, "  --echo-mode -m        The echo mode for server.0:immediate, 1: random time, 2: no response.\n");
     exit(0);
 }
 

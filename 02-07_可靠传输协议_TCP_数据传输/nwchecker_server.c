@@ -83,7 +83,7 @@ int nwc_server(struct nwc_args *na)
             usleep(sleep_time * 1000);
         }
 
-        if ( echo_mode != 3){
+        if ( echo_mode != 2){
             rc = send(client_sock_fd, pong, pong_len, 0); 
             if (rc == -1){
                 printf("Send ping reponse failed! errno(%d)\n", errno);

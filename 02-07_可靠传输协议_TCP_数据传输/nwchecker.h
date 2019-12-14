@@ -17,7 +17,7 @@ struct nwc_args
 int nwc_client(struct nwc_args *na);
 int nwc_server(struct nwc_args *na);
 
-char * alloc_buffer(int message_size);
+char * alloc_buffer(int alloc_size);
 void free_buffer(char *buff);
 
 

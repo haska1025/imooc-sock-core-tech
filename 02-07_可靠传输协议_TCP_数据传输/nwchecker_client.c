@@ -40,16 +40,23 @@ int nwc_client(struct nwc_args *na)
         return -1;
     }
 
-    send_msg_len = na->message_size;
+    send_msg_len = na->message_size <= 0?5:na->message_size;
     send_msg = alloc_buffer(send_msg_len);
 
-    useconds_t sleep_time = na->interval <= 0 ? 3000:na->interval;
+    useconds_t sleep_time = na->interval <= 0 ? 3000 : na->interval;
     int slot_send_count = na->sent_pkgs <= 0? 1: na->sent_pkgs;
     int cur_slot_sent = slot_send_count;
     int infinit = na->count <= 0 ? 1:0;
     int loop_count = na->count * slot_send_count;
-
     int echo_mode = na->echo_mode;
+
+    printf("nwc client. slot_send_count(%d) infinit(%d) loop_count(%d) echo_mode(%d) sleep_time(%d)\n",
+            slot_send_count,
+            infinit,
+            loop_count,
+            echo_mode,
+            sleep_time);
+
     while(1){
         rc = send(sock_fd, send_msg, send_msg_len, 0); 
         if (rc == -1){
@@ -63,7 +70,7 @@ int nwc_client(struct nwc_args *na)
             printf("%ld Send %ld message to server!\n", time(NULL), send_msg_len);
         }
 
-        if (echo_mode != 3){
+        if (echo_mode != 2){
             rc = recv(sock_fd, recv_buffer, 7, 0);
             if (rc == 0){
                 printf("The connection is closed by peer!\n");

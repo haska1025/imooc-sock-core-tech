@@ -94,7 +94,8 @@ int nwc_client(struct nwc_args *na)
 
         // Sleep 3 seconds
         //sleep(3);
-        if (cur_slot_sent-- == 0){
+        cur_slot_sent--; 
+        if (cur_slot_sent == 0){
             usleep(sleep_time * 1000);
             cur_slot_sent = slot_send_count;
         }

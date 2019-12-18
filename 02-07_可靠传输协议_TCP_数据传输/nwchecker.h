@@ -11,7 +11,7 @@ struct nwc_args
     int interval;  // The unit is ms
     int sent_pkgs; // The sent packages of every slot.
     int message_size; // The send message size. 
-    int echo_mode; // 1:immediate, 2: random time, 3: no response
+    int echo_mode; // 0:immediate, 1: random time, 2: no response, 3: server not recv
 };
 
 int nwc_client(struct nwc_args *na);

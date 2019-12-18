@@ -66,19 +66,21 @@ int nwc_server(struct nwc_args *na)
     recv_buffer = alloc_buffer(RECV_BUFF_LEN);
 
     while(1){
-        rc = recv(client_sock_fd, recv_buffer, RECV_BUFF_LEN, 0);
-        if (rc == 0){
-            printf("The connection is closed by peer!\n");
-            break;
+        if (echo_mode != 3){
+            rc = recv(client_sock_fd, recv_buffer, RECV_BUFF_LEN, 0);
+            if (rc == 0){
+                printf("The connection is closed by peer!\n");
+                break;
+            }
+
+            if (rc == -1){
+                printf("Receive message failed!errno(%d)\n", errno);
+                break;
+            }
+
+            printf("%ld Recv %s from the client\n", time(NULL), recv_buffer);
         }
 
-        if (rc == -1){
-            printf("Receive message failed!errno(%d)\n", errno);
-            break;
-        }
-
-        printf("%ld Recv %s from the client\n", time(NULL), recv_buffer);
-         
         if ( sleep_time > 0){
             usleep(sleep_time * 1000);
         }

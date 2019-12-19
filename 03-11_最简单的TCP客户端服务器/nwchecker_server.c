@@ -68,6 +68,8 @@ void worker_process(struct nwc_connection *nwc)
     }
 
     printf("The child(%d) fd(%d) exit\n", getpid(), nwc->fd);
+
+    _exit(1);
 }
 
 
@@ -151,6 +153,7 @@ int nwc_server(struct nwc_args *na)
         }else{
             // Parent process
             nwc->pid = pid;
+            close(client_sock_fd);
             add_nwc_tail(&nwc_hdr, nwc);
         }
     }

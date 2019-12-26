@@ -91,7 +91,7 @@ int unix_stream_client(struct nwc_args *na)
         bytes_per_sec = total_send_size/secs;
     }
 
-    printf("Send totalsize(%lu) secs(%lu) bytes_per_sec(%lu)",
+    printf("Send totalsize(%lu) secs(%lu) bytes_per_sec(%lu)\n",
             total_send_size,
             secs,
             bytes_per_sec);

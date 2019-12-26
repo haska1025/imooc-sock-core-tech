@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "nwchecker.h"
 
@@ -20,6 +21,8 @@ int unix_dgram_client(struct nwc_args *na)
     memset(&localaddr, 0, sizeof(localaddr));
     localaddr.sun_family = AF_LOCAL;
     strncpy(localaddr.sun_path, na->localaddr, sizeof(localaddr.sun_path) - 1);
+
+    unlink(localaddr.sun_path);
 
     rc = bind(fd, (struct sockaddr*)&localaddr, sizeof(localaddr));
     if (rc == -1){

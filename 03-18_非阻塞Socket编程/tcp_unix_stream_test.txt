@@ -1,0 +1,69 @@
+-- Unix 域客户端测试 case
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 9333 -g 2000000
+Send totalsize(18666000000) secs(4) bytes_per_sec(4666500000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 2333 -g 2000000
+Send totalsize(4666000000) secs(1) bytes_per_sec(4666000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 1000
+Send totalsize(100000000) secs(2) bytes_per_sec(50000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 4000
+Send totalsize(400000000) secs(1) bytes_per_sec(400000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 32000
+Send totalsize(3200000000) secs(2) bytes_per_sec(1600000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 2000
+Send totalsize(200000000) secs(2) bytes_per_sec(100000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 64000
+Send totalsize(6400000000) secs(2) bytes_per_sec(3200000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 128000
+Send totalsize(12800000000) secs(3) bytes_per_sec(4266666666)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 10000 -g 1000000
+Send totalsize(10000000000) secs(2) bytes_per_sec(5000000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 10000 -g 2000000
+Send totalsize(20000000000) secs(3) bytes_per_sec(6666666666)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 10000 -g 3000000
+Send totalsize(30000000000) secs(6) bytes_per_sec(5000000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 100
+Send totalsize(10000000) secs(2) bytes_per_sec(5000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a xxx --unix-stream -i 20 -o 1 -e 100000 -g 500
+Send totalsize(50000000) secs(1) bytes_per_sec(50000000)
+
+
+-- TCP 客户端 测试 Case
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 9333 -g 2000000
+nwc client. slot_send_count(9333) infinit(0) loop_count(9333) echo_mode(0) sleep_time(20)
+Send totalsize(18666000000) secs(4) bytes_per_sec(4666500000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 2333 -g 2000000
+nwc client. slot_send_count(2333) infinit(0) loop_count(2333) echo_mode(0) sleep_time(20)
+Send totalsize(4666000000) secs(1) bytes_per_sec(4666000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 1000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(100000000) secs(2) bytes_per_sec(50000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 4000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(400000000) secs(1) bytes_per_sec(400000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 32000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(3200000000) secs(2) bytes_per_sec(1600000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 2000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(200000000) secs(2) bytes_per_sec(100000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 64000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(6400000000) secs(3) bytes_per_sec(2133333333)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 128000
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(12800000000) secs(4) bytes_per_sec(3200000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 10000 -g 1000000
+nwc client. slot_send_count(10000) infinit(0) loop_count(10000) echo_mode(0) sleep_time(20)
+Send totalsize(10000000000) secs(2) bytes_per_sec(5000000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 10000 -g 2000000
+nwc client. slot_send_count(10000) infinit(0) loop_count(10000) echo_mode(0) sleep_time(20)
+Send totalsize(20000000000) secs(4) bytes_per_sec(5000000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 10000 -g 3000000
+nwc client. slot_send_count(10000) infinit(0) loop_count(10000) echo_mode(0) sleep_time(20)
+Send totalsize(30000000000) secs(6) bytes_per_sec(5000000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 100
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(10000000) secs(2) bytes_per_sec(5000000)
+ubuntu@10-9-50-2:~/imooc-sock-core-tech/03-13_UNIX域套接字编程$ ./nwc -c -a 127.0.0.1 -p 3333 -t -i 20 -o 1 -e 100000 -g 500
+nwc client. slot_send_count(100000) infinit(0) loop_count(100000) echo_mode(0) sleep_time(20)
+Send totalsize(50000000) secs(2) bytes_per_sec(25000000)

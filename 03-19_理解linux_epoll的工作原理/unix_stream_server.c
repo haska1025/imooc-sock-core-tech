@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcnt.h>
+#include <fcntl.h>
 
 #include "nwchecker.h"
 
@@ -51,7 +51,7 @@ int unix_stream_server(struct nwc_args *na)
         return -1;
     }
 
-    epfd = epoll_create(0);
+    epfd = epoll_create(MAX_EPOLL_EVENTS);
     if (epfd == -1){
         printf("epoll_create failed(%d)\n", errno);
         close(fd);
@@ -104,6 +104,7 @@ int unix_stream_server(struct nwc_args *na)
                         break;
                     }
                 }
+                continue;
             }
 
             if (events[i].events & EPOLLIN){
@@ -128,7 +129,7 @@ int unix_stream_server(struct nwc_args *na)
                 output_log = rc <= 5? 1:0;
 
                 if (output_log){
-                    printf("Recv (%s) request!\n", buff);
+                    printf("Recv (%s) request from(%d)!\n", recv_buffer, sfd);
                 }
             }
 
@@ -145,7 +146,7 @@ int unix_stream_server(struct nwc_args *na)
                         ;
                     }else if (errno == EAGAIN){
                         ev.events = EPOLLIN | EPOLLOUT;
-                        ev.data.u64 = 2 << 32 | sfd;
+                        ev.data.u64 = 2L << 32 | sfd;
                         if (epoll_ctl(epfd, EPOLL_CTL_MOD, sfd, &ev) == -1){
                             printf("Add write event for sfd to epoll failed. errno(%d)\n", errno);
                             close(sfd);

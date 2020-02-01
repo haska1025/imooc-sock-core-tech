@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <unistd.h>
-
 #include "nwc_connection.h"
 
 struct nwc_connection *alloc_nwc_conn_arg0()
@@ -37,7 +36,6 @@ void free_nwc_conn(struct nwc_connection *nwc)
             close(nwc->fd);
             nwc->fd = -1;
         }
-
         free(nwc);
         nwc = NULL;
     }

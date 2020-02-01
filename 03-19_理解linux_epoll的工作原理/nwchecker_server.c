@@ -160,7 +160,7 @@ int nwc_server(struct nwc_args *na)
                     if (rc == -1){
                         printf("Receive message failed!errno(%d)\n", errno);
                         if (errno == EINTR){
-                            continue;
+                            ;
                         }else if (errno == EAGAIN){
                             ;// do nothing
                         }else{
@@ -189,7 +189,7 @@ int nwc_server(struct nwc_args *na)
                     if (rc == -1){
                         printf("Send ping reponse failed! errno(%d)\n", errno);
                         if (errno == EINTR){
-                            continue;
+                            ;
                         }else if (errno == EAGAIN){
                             nwc->events |= 2;
                         }else{

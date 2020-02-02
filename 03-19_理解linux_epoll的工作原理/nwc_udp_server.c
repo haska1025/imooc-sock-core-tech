@@ -47,6 +47,7 @@ int nwc_udp_server(struct nwc_args *na)
     rc = bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if (rc == -1){
         printf("Bind server failed! errno(%d)\n", errno);
+        close(sock_fd);
         return -1;
     }
 

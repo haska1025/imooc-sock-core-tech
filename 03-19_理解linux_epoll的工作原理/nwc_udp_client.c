@@ -43,6 +43,7 @@ int nwc_udp_client(struct nwc_args *na)
         rc = connect(sock_fd, destaddr, destaddrlen);
         if (rc == -1){
             printf("Connect server failed! errno(%d)\n", errno);
+            close(sock_fd);
             return -1;
         }
         destaddr = NULL;

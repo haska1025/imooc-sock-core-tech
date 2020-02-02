@@ -28,6 +28,7 @@ int unix_dgram_server(struct nwc_args *na)
     rc = bind(fd, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
     if (rc == -1){
         printf("Bind unix stream server failed!errno(%d)\n", errno);
+        close(fd);
         return -1;
     }
 
@@ -51,6 +52,8 @@ int unix_dgram_server(struct nwc_args *na)
 
         printf("Send pong response!\n");
     }
+
+    close(fd);
 
     return 0;
 }

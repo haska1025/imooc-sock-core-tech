@@ -31,6 +31,7 @@ int unix_stream_client(struct nwc_args *na)
     rc = connect(fd, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
     if (rc == -1){
         printf("Connect unix stream server failed!errno(%d)\n", errno);
+        close(fd);
         return -1;
     }
 
@@ -95,6 +96,8 @@ int unix_stream_client(struct nwc_args *na)
             total_send_size,
             secs,
             bytes_per_sec);
+
+    close(fd);
 
     return 0;
 }

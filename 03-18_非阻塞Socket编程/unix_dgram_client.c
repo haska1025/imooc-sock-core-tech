@@ -27,6 +27,7 @@ int unix_dgram_client(struct nwc_args *na)
     rc = bind(fd, (struct sockaddr*)&localaddr, sizeof(localaddr));
     if (rc == -1){
         printf("Bind unix local dgram addr failed!errno(%d)\n", errno);
+        close(fd);
         return -1;
     }
 
@@ -38,6 +39,7 @@ int unix_dgram_client(struct nwc_args *na)
         rc = connect(fd, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
         if (rc == -1){
             printf("Connect unix dgram server failed!errno(%d)\n", errno);
+            close(fd);
             return -1;
         }
     }
@@ -72,6 +74,8 @@ int unix_dgram_client(struct nwc_args *na)
 
         printf("Recv (%s) response!\n", buff);
     }
+
+    close(fd);
 
     return 0;
 }

@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/socket.h>
-#include <arpa/inet.h> // inet_addr()
+#include <arpa/inet.h>
+#include <signal.h>
 
 #include "nwchecker.h"
 #include "nwc_connection.h"
@@ -74,17 +75,19 @@ int sigio_udp_server(struct nwc_args *na)
     sigemptyset(&sa.sa_mask);
     sa.sa_handler = sigio_handler;
     sa.sa_flags = 0;
-    sigaction(SIGIO, &sa, NULL);
+    rc = sigaction(SIGIO, &sa, NULL);
+    if (rc == -1){
+        printf("Seit sigio failed errno(%d)\n", errno);
+        return -1;
+    }
 
     // Set ownpid
     fcntl(sock_fd, F_SETOWN, getpid());
 
     // Set nonblocking and async
-    int flags = 0;
-    fcntl(sock_fd, F_GETFL, &flags);
-    flags |= O_NONBLOCK; 
-    flags |= O_ASYNC;
-    fcntl(sock_fd, F_SETFL, &flags);
+    int flags = fcntl(sock_fd, F_GETFL);
+    flags = flags | O_NONBLOCK | O_ASYNC; 
+    fcntl(sock_fd, F_SETFL, flags);
 
     // Set signal mask
     sigemptyset(&io_sigset);
@@ -111,9 +114,12 @@ int sigio_udp_server(struct nwc_args *na)
                     ntohs(nwc->addr.sin_port),
                     rc,
                     errno);
-            struct nwc_connection *next_nwc = nwc->next;
+            struct nwc_connection *nwc_next = nwc->next;
+            struct nwc_connection *nwc_prev = nwc->prev;
+            nwc_next->prev = nwc_prev;
+            nwc_prev->next = nwc_next;
             free_nwc_conn(nwc);
-            nwc = next_nwc;
+            nwc = nwc_next;
         }
     }
 

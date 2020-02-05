@@ -49,6 +49,7 @@ void usage()
     fprintf(stderr, "  --tcp -t              The TCP Socket.\n");
     fprintf(stderr, "  --unix-stream         The UNIX Stream Socket.\n");
     fprintf(stderr, "  --unix-dgram          The UNIX Dgram Socket.\n");
+    fprintf(stderr, "  --sigio               The Signal IO.\n");
     fprintf(stderr, "  --connect             The UDP client with connect socket.\n");
 
     exit(0);
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
             {"connect", no_argument,        0,  1 },
             {"unix-stream", no_argument,    0,  2 },
             {"unix-dgram", no_argument,     0,  3 },
+            {"sigio", no_argument,          0,  4 },
             {0,         0,                  0,  0 }
         };
 
@@ -148,6 +150,9 @@ int main(int argc, char *argv[])
             case 3:
                 trans_type = 4;
                 break;
+            case 4:
+                trans_type = 5;
+                break;
             default:
                 usage();
         }
@@ -182,6 +187,8 @@ int main(int argc, char *argv[])
             unix_stream_server(&na);
         }else if(trans_type == 4){
             unix_dgram_server(&na);
+        }else if(trans_type == 5){
+            sigio_udp_server(&na);
         }
     }
 

@@ -36,10 +36,9 @@ int nwc_server(struct nwc_args *na)
         return -1;
     }
 
-    int flags = 0;
-    fcntl(sock_fd, F_GETFL, &flags);
+    int flags = fcntl(sock_fd, F_GETFL);
     flags |= O_NONBLOCK; 
-    fcntl(sock_fd, F_SETFL, &flags);
+    fcntl(sock_fd, F_SETFL, flags);
 
 
     int enable = 1;
@@ -134,10 +133,9 @@ int nwc_server(struct nwc_args *na)
                 nwc->events = 1;// Add read event
                 nwc->recv_buffer = alloc_buffer(RECV_BUFF_LEN);
 
-                int flags = 0;
-                fcntl(client_sock_fd, F_GETFL, &flags);
+                int flags = fcntl(client_sock_fd, F_GETFL);
                 flags |= O_NONBLOCK; 
-                fcntl(client_sock_fd, F_SETFL, &flags);
+                fcntl(client_sock_fd, F_SETFL, flags);
 
                 nwc->events = 1;
                 nwc->fd = client_sock_fd;

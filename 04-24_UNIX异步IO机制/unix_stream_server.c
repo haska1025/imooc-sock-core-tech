@@ -26,10 +26,9 @@ int unix_stream_server(struct nwc_args *na)
         return -1;
     }
 
-    int flags = 0;
-    fcntl(fd, F_GETFL, &flags);
+    int flags = fcntl(fd, F_GETFL);
     flags |= O_NONBLOCK; 
-    fcntl(fd, F_SETFL, &flags);
+    fcntl(fd, F_SETFL, flags);
 
     memset(&serveraddr, 0, sizeof(serveraddr));
 
@@ -91,10 +90,9 @@ int unix_stream_server(struct nwc_args *na)
                 }else{
                     printf("Accept a new unix stream fd(%d)\n", newfd);
 
-                    int flags = 0;
-                    fcntl(newfd, F_GETFL, &flags);
+                    int flags = fcntl(newfd, F_GETFL);
                     flags |= O_NONBLOCK; 
-                    fcntl(newfd, F_SETFL, &flags);
+                    fcntl(newfd, F_SETFL, flags);
 
                     ev.events = EPOLLIN;
                     ev.data.fd = newfd;

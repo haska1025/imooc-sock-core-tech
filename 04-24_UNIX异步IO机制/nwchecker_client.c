@@ -39,10 +39,9 @@ int nwc_client(struct nwc_args *na)
         return -1;
     }
 
-    int flags = 0;
-    fcntl(sock_fd, F_GETFL, &flags);
+    int flags = fcntl(sock_fd, F_GETFL);
     flags |= O_NONBLOCK; 
-    fcntl(sock_fd, F_SETFL, &flags);
+    fcntl(sock_fd, F_SETFL, flags);
 
     memset(&serveraddr, 0, sizeof(serveraddr));
 

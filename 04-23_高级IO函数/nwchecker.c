@@ -170,12 +170,10 @@ int main(int argc, char *argv[])
             unix_dgram_client(&na);
         }
     }else if (mode == 2){
-        /*
         if (daemon(0, 0) == -1){
             printf("Create daemon failed.errno(%d)\n", errno);
             exit(-1);
         }
-        */
 
         signal(SIGPIPE, SIG_IGN);
         // nwc server 

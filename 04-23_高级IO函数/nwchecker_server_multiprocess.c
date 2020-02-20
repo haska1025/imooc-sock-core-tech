@@ -39,10 +39,11 @@ struct worker_context
 
 static int current_worker_index = 0;
 static struct worker_context worker_ctxs[4];
+static struct worker_context g_ctx;
 
 static int worker_context_init(struct worker_context *ctx, int timeout)
 {
-    if (socketpair(AF_LOCAL, SOCK_STREAM, 0, ctx->notify_fd) == -1){
+    if (socketpair(AF_LOCAL, SOCK_DGRAM, 0, ctx->notify_fd) == -1){
         printf("Invoke socketpair failed(%d)\n", errno);
         return -1;
     }
@@ -55,7 +56,6 @@ static int worker_context_init(struct worker_context *ctx, int timeout)
 
     return 0;
 }
-
 
 // Get worker by Round Robin policy.
 static struct worker_context *get_worker()
@@ -75,14 +75,19 @@ static int worker_send_msg(int sockfd, struct iovec *iov, int iovlen,const int *
     msg.msg_namelen = 0;
     msg.msg_iov = iov;
     msg.msg_iovlen = iovlen;
-    msg.msg_control = buf;
-    msg.msg_controllen = sizeof(buf);
+    if (fds != NULL && fdnum > 0){
+        msg.msg_control = buf;
+        msg.msg_controllen = sizeof(buf);
 
-    cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * fdnum);
-    memcpy(CMSG_DATA(cmsg), fds, sizeof(int) *fdnum);
+        cmsg = CMSG_FIRSTHDR(&msg);
+        cmsg->cmsg_level = SOL_SOCKET;
+        cmsg->cmsg_type = SCM_RIGHTS;
+        cmsg->cmsg_len = CMSG_LEN(sizeof(int) * fdnum);
+        memcpy(CMSG_DATA(cmsg), fds, sizeof(int) *fdnum);
+    }else{
+        msg.msg_control = NULL;
+        msg.msg_controllen = 0;
+    }
 
     return sendmsg(sockfd, &msg, 0);
 }
@@ -122,6 +127,17 @@ static int worker_recv_msg(int sockfd, struct iovec *iov, int iovlen, int *fds, 
     return rc;
 }
 
+static int send_cmd(int sockfd, struct worker_cmd *cmd, int *fds, int fdnum)
+{
+    struct worker_context *ctx = get_worker();
+    struct iovec io[2];
+    io[0].iov_base = &cmd->cmd;
+    io[0].iov_len = 4;
+    io[1].iov_base = cmd->msg;
+    io[1].iov_len = strlen(cmd->msg);
+    return worker_send_msg(sockfd, io, 2, fds, fdnum);
+}
+
 static void worker(struct worker_context *ctx)
 {
     fd_set readfds, writefds;
@@ -131,10 +147,13 @@ static void worker(struct worker_context *ctx)
     int client_sock_fd = -1;
     int max_fd = -1;
     int rc = -1;
+    int stop = 0;
 
     ctx->pid = getpid();
 
-    while(1){
+    printf("The worker(%d) start...\n", ctx->pid);
+
+    while(!stop){
         FD_ZERO(&readfds);
         FD_ZERO(&writefds);
 
@@ -143,13 +162,11 @@ static void worker(struct worker_context *ctx)
             max_fd = ctx->notify_fd[1];
         }
 
-
         if (ctx->listen_fd != -1){
             FD_SET(ctx->listen_fd, &readfds);
             if (ctx->listen_fd > max_fd)
                 max_fd = ctx->listen_fd;
         }
-
 
         for (struct nwc_connection *nwc = ctx->nwc_hdr.next; nwc != &ctx->nwc_hdr;){
             if (nwc->fd == -1){
@@ -199,19 +216,24 @@ static void worker(struct worker_context *ctx)
             fdnum =1;
             worker_recv_msg(ctx->notify_fd[1], io, 2, &fd, &fdnum); 
             
-            printf("recv new cmd(%d:%s) fd(%d) from master.\n", cmd, buf, fd);
+            printf("The worker(%d) recv new cmd(%d:%s) fd(%d) from master.\n",ctx->pid, cmd, buf, fd);
 
-            struct nwc_connection *nwc = alloc_nwc_conn(ctx->pid, fd);
-            nwc->events = 1;// Add read event
-            nwc->recv_buffer = alloc_buffer(RECV_BUFF_LEN);
+            if (cmd == CMD_FD){
+                struct nwc_connection *nwc = alloc_nwc_conn(ctx->pid, fd);
+                nwc->events = 1;// Add read event
+                nwc->recv_buffer = alloc_buffer(RECV_BUFF_LEN);
 
-            int flags = fcntl(fd, F_GETFL);
-            flags |= O_NONBLOCK; 
-            fcntl(fd, F_SETFL, flags);
+                int flags = fcntl(fd, F_GETFL);
+                flags |= O_NONBLOCK; 
+                fcntl(fd, F_SETFL, flags);
 
-            nwc->events = 1;
-            nwc->fd = fd;
-            add_nwc_tail(&ctx->nwc_hdr, nwc);
+                nwc->events = 1;
+                nwc->fd = fd;
+                add_nwc_tail(&ctx->nwc_hdr, nwc);
+            }else if (cmd == CMD_EXIT){
+                stop = 1;
+            }
+            continue;
         }
 
         if (FD_ISSET(ctx->listen_fd, &readfds)){
@@ -231,16 +253,18 @@ static void worker(struct worker_context *ctx)
 
                 // Notify worker
                 struct worker_context *ctx = get_worker();
-                struct iovec io[2];
-                int cmd = CMD_FD; 
-                char *msg = "fd";
-                io[0].iov_base = &cmd;
-                io[0].iov_len = 4;
-                io[1].iov_base = msg;
-                io[1].iov_len = 2;
-                worker_send_msg(ctx->notify_fd[0], io, 2, &client_sock_fd, 1);
+                struct worker_cmd cmd;
+                cmd. cmd = CMD_FD; 
+                cmd.msg = "fd";
+                int rc = send_cmd(ctx->notify_fd[0], &cmd, &client_sock_fd, 1);
+                printf("Send new fd(%d) to worker(%d:%d) rc(%d)\n",
+                        client_sock_fd,
+                        ctx->pid,
+                        ctx->notify_fd[0],
+                        rc);
                 close(client_sock_fd);
-           }
+            }
+            continue;
         }
 
         for (struct nwc_connection *nwc = ctx->nwc_hdr.next; nwc != &ctx->nwc_hdr; nwc = nwc->next){
@@ -306,6 +330,22 @@ static void worker(struct worker_context *ctx)
 
     destroy_all_nwc(&ctx->nwc_hdr);
     close(ctx->notify_fd[1]);
+
+    printf("The worker(%d) exit...\n", ctx->pid);
+}
+
+void notify_exit(int fd)
+{
+    struct worker_cmd cmd;
+    cmd.cmd = CMD_EXIT;
+    cmd.msg = "exit";
+    int rc = send_cmd(fd, &cmd , NULL, 0);
+    printf("Send exit cmd fd(%d) rc(%d:%d)\n", fd, rc, errno);
+}
+void exit_handler(int signo)
+{
+    printf("exit handler\n");
+    notify_exit(g_ctx.notify_fd[0]);
 }
 
 int nwc_server_process(struct nwc_args *na)
@@ -351,19 +391,18 @@ int nwc_server_process(struct nwc_args *na)
         return -1;
     }
 
-
     useconds_t sleep_time = na->interval < 0 ? 0:na->interval;
-
     for (int i=0; i < 4; i++){
+        if (worker_context_init(&worker_ctxs[i], sleep_time) != 0){
+            goto exit;
+        }
+
         pid_t pid = fork();
         if (pid == 0){
-            if (worker_context_init(&worker_ctxs[i], sleep_time) != 0){
-                exit(-1);
-            }
-
             close(worker_ctxs[i].notify_fd[0]);
             worker_ctxs[i].notify_fd[0] = -1;
             worker(&worker_ctxs[i]);
+            _exit(-1);
         }else{
             close(worker_ctxs[i].notify_fd[1]);
             worker_ctxs[i].notify_fd[1] = -1;
@@ -371,21 +410,27 @@ int nwc_server_process(struct nwc_args *na)
         }
     }
 
-    struct worker_context ctx;
+    signal(SIGINT, exit_handler);
+    signal(SIGTERM, exit_handler);
 
-    ctx.notify_fd[0] = -1;
-    ctx.notify_fd[1] = -1;
-    ctx.pid = getpid();
-    ctx.listen_fd = sock_fd;
-    ctx.timeout = 0;
+    if (worker_context_init(&g_ctx, 0) != 0){
+        goto exit;
+    }
+    g_ctx.pid = getpid();
+    g_ctx.listen_fd = sock_fd;
+    worker(&g_ctx);
 
-    worker(&ctx);
-
+exit:
     for (int i=0; i < 4; i++){
+        notify_exit(worker_ctxs[i].notify_fd[0]);
         waitpid(worker_ctxs[i].pid, NULL, WUNTRACED);
         close(worker_ctxs[i].notify_fd[0]);
     }
 
+    printf("The master exit...\n");
+
+    close(g_ctx.notify_fd[0]);
+    close(g_ctx.notify_fd[1]);
     close(sock_fd);
 
     return 0;

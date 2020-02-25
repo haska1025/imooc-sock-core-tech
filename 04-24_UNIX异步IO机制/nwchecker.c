@@ -49,6 +49,7 @@ void usage()
     fprintf(stderr, "  --tcp -t              The TCP Socket.\n");
     fprintf(stderr, "  --unix-stream         The UNIX Stream Socket.\n");
     fprintf(stderr, "  --unix-dgram          The UNIX Dgram Socket.\n");
+	fprintf(stderr, "  --multi-process       The architecture for TCP Server is multiple process.\n");
     fprintf(stderr, "  --sigio               The Signal IO.\n");
     fprintf(stderr, "  --connect             The UDP client with connect socket.\n");
 
@@ -90,7 +91,8 @@ int main(int argc, char *argv[])
             {"connect", no_argument,        0,  1 },
             {"unix-stream", no_argument,    0,  2 },
             {"unix-dgram", no_argument,     0,  3 },
-            {"sigio", no_argument,          0,  4 },
+			{"multi-process", no_argument,  0,  4 },
+            {"sigio", no_argument,          0,  5 },
             {0,         0,                  0,  0 }
         };
 
@@ -153,6 +155,9 @@ int main(int argc, char *argv[])
             case 4:
                 trans_type = 5;
                 break;
+			case 5:
+                trans_type = 6;
+                break;
             default:
                 usage();
         }
@@ -170,12 +175,10 @@ int main(int argc, char *argv[])
             unix_dgram_client(&na);
         }
     }else if (mode == 2){
-        /*
         if (daemon(0, 0) == -1){
             printf("Create daemon failed.errno(%d)\n", errno);
             exit(-1);
         }
-        */
 
         signal(SIGPIPE, SIG_IGN);
         // nwc server 
@@ -188,6 +191,8 @@ int main(int argc, char *argv[])
         }else if(trans_type == 4){
             unix_dgram_server(&na);
         }else if(trans_type == 5){
+            nwc_server_process(&na);
+        }else if(trans_type == 6){
             sigio_udp_server(&na);
         }
     }

@@ -28,6 +28,7 @@ int unix_stream_server(struct nwc_args *na);
 int unix_dgram_client(struct nwc_args *na);
 int unix_dgram_server(struct nwc_args *na);
 
+int nwc_server_process(struct nwc_args *na);
 int sigio_udp_server(struct nwc_args *na);
 
 char * alloc_buffer(int alloc_size);

@@ -40,7 +40,6 @@ int nwc_server(struct nwc_args *na)
     flags |= O_NONBLOCK; 
     fcntl(sock_fd, F_SETFL, flags);
 
-
     int enable = 1;
     if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1){
         printf("setsockopt(SO_REUSEADDR) failed errno(%d)", errno);

@@ -21,7 +21,8 @@ struct nwc_io_op
 {
     OVERLAPPED olapped;
     int op;
-    SOCKET socket;};
+    SOCKET socket;
+};
 
 struct nwc_io_op * alloc_nwc_io_op(int op);
 void free_nwc_io_op(struct nwc_io_op *op);

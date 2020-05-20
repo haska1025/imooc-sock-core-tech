@@ -10,7 +10,7 @@
 
 #include "mcast.h"
 
-#define PORT 13
+#define PORT "13"
 
 int main(int argc, char *argv[])
 {
@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
     //install SIGPIPE
     signal(SIGPIPE, SIG_IGN);
 
-    printf("Start mcast client local_ip(%s) mcast_gip(%s) port(%d)\n", local_ip ? local_ip : "", grp_ip, PORT);
+    printf("Start mcast client local_ip(%s) mcast_gip(%s) port(%s)\n", local_ip ? local_ip : "", grp_ip, PORT);
 
-    rc = mcast_get_addr(grp_ip, "13", (struct sockaddr*)&grp_addr);
+    rc = mcast_get_addr(grp_ip, PORT, (struct sockaddr*)&grp_addr);
     if (rc != 0){
         fprintf(stderr, "Get multicast addr failed! rc(%d)\n", rc);
         return rc;
@@ -58,11 +58,12 @@ int main(int argc, char *argv[])
             return rc;
         }
     }
-    
-    sockfd = socket(grp_addr.ss_family, SOCK_DGRAM, 0);
-    if (rc == -1){
+
+    // Create listen socket
+    sockfd = mcast_listen(grp_addr.ss_family, PORT);
+    if (sockfd < 0){
         fprintf(stderr, "Open multicast socket failed! errno(%d)\n", errno);
-        return rc;
+        return -1;
     }
 
     rc = mcast_join_group(sockfd, (struct sockaddr*)&grp_addr, local_ip ? (struct sockaddr*)&local_addr : NULL);

@@ -12,57 +12,6 @@
 
 #define PORT "13"
 
-static int mcast_listen(int family, const char *port)
-{
-    int rc = 0;
-    struct addrinfo hints, *res, *ressave;
-
-    memset(&hints, 0, sizeof(struct addrinfo));
-
-    /*
-     * AI_PASSIVE flag: the resulting address is used to bind
-     * to a socket for accepting incoming connections.
-     * So, when the hostname==NULL, getaddrinfo function will
-     * return one entry per allowed protocol family containing
-     * the unspecified address for that family.
-     */
-    res = NULL;
-    ressave = NULL;
-    hints.ai_flags    = AI_PASSIVE;
-    hints.ai_family   = family;
-    hints.ai_socktype = SOCK_DGRAM;
-
-    rc = getaddrinfo(NULL, port, &hints, &res);
-    if (rc != 0){
-        printf("mcast_listen get host name failed rc(%d) errstr(%s)", rc, gai_strerror(rc));
-        return -1;
-    }
-
-    ressave=res;
-
-    rc = -1;
-
-    while (res) {
-        int fd = socket(res->ai_family,
-                res->ai_socktype,
-                res->ai_protocol);
-
-        if (fd >=0 && res->ai_family == family) {
-            if ((rc = bind(fd, res->ai_addr, res->ai_addrlen)) == 0){
-                rc = fd;
-                break;
-            }
-        }
-
-        close(fd);
-        res = res->ai_next;
-    }
-
-    freeaddrinfo(ressave);
-
-    return rc;
-}
-
 int main(int argc, char *argv[])
 {
     int rc = 0;
@@ -137,15 +86,14 @@ int main(int argc, char *argv[])
 
     for ( ; ;) {
         memset(&peer_addr, 0 , sizeof(peer_addr));
-        socklen_t socklen = 0;
-        socklen = sizeof(peer_addr);
+        socklen_t addrlen = sizeof(peer_addr);
 
         rc = recvfrom(sockfd,
                 b,  
                 sizeof(b),
                 0,  
                 (struct sockaddr*)&peer_addr,
-                &socklen);
+                &addrlen);
 
         if (rc <0) 
             continue;

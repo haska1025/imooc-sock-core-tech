@@ -1,6 +1,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -106,5 +107,16 @@ int mcast_set_loop(int fd, int family, int flag)
         rc = setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &flag, sizeof(flag));
     }
     return rc;
+}
+
+int mcast_inet_ntop(struct sockaddr *addr, char ip[], int iplen)
+{
+    if (addr->sa_family == AF_INET){
+        inet_ntop(AF_INET, &((struct sockaddr_in*)addr)->sin_addr, ip, iplen);
+    }else if(addr->sa_family == AF_INET6){
+        inet_ntop(AF_INET6, &((struct sockaddr_in6*)addr)->sin6_addr, ip, iplen);
+    }
+
+    return 0;
 }
 

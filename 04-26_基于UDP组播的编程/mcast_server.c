@@ -12,7 +12,7 @@
 
 #define PORT "13"
 
-static int mcast_listen(const char *port)
+static int mcast_listen(int family, const char *port)
 {
     int rc = 0;
     struct addrinfo hints, *res, *ressave;
@@ -29,7 +29,7 @@ static int mcast_listen(const char *port)
     res = NULL;
     ressave = NULL;
     hints.ai_flags    = AI_PASSIVE;
-    hints.ai_family   = AF_UNSPEC;
+    hints.ai_family   = family;
     hints.ai_socktype = SOCK_DGRAM;
 
     rc = getaddrinfo(NULL, port, &hints, &res);
@@ -47,7 +47,7 @@ static int mcast_listen(const char *port)
                 res->ai_socktype,
                 res->ai_protocol);
 
-        if (fd >=0 && (res->ai_family == AF_INET || res->ai_family == AF_INET6)) {
+        if (fd >=0 && res->ai_family == family) {
             if ((rc = bind(fd, res->ai_addr, res->ai_addrlen)) == 0){
                 rc = fd;
                 break;
@@ -88,13 +88,18 @@ int main(int argc, char *argv[])
     //install SIGPIPE
     signal(SIGPIPE, SIG_IGN);
 
-    printf("Start mcast server local_ip(%s) mcast_gip(%s) port(%d)\n", local_ip?local_ip:"", grp_ip, PORT);
+    printf("Start mcast server local_ip(%s) mcast_gip(%s) port(%s)\n", local_ip?local_ip:"", grp_ip, PORT);
 
-    rc = mcast_get_addr(grp_ip, "13", (struct sockaddr*)&grp_addr);
+    rc = mcast_get_addr(grp_ip, PORT, (struct sockaddr*)&grp_addr);
     if (rc != 0){
         fprintf(stderr, "Get multicast addr failed! rc(%d)\n", rc);
         return rc;
     }
+
+    mcast_inet_ntop((struct sockaddr*)&grp_addr, clienthost, 255);
+
+    printf("The group ip(%s)\n", clienthost);
+
     if (local_ip){
         rc = mcast_get_addr(local_ip, NULL, (struct sockaddr*)&local_addr);
         if (rc != 0){
@@ -104,7 +109,7 @@ int main(int argc, char *argv[])
     }
  
     // Create listen socket
-    sockfd = mcast_listen(PORT);
+    sockfd = mcast_listen(grp_addr.ss_family, PORT);
     if (sockfd < 0){
         fprintf(stderr, "Open multicast socket failed! errno(%d)\n", errno);
         return -1;
@@ -112,20 +117,20 @@ int main(int argc, char *argv[])
 
     rc = mcast_join_group(sockfd, (struct sockaddr*)&grp_addr, local_ip ? (struct sockaddr*)(&local_addr) : NULL);
     if (rc != 0){
-        fprintf(stderr, "Join multicast group failed! errno(%d)\n", rc);
+        fprintf(stderr, "Join multicast group failed! errno(%d)\n", errno);
         close(sockfd);
         return rc;
     }
 
     rc = mcast_set_ttl(sockfd, grp_addr.ss_family, 1);
     if (rc != 0){
-        fprintf(stderr, "Set multicast ttl failed! rc(%d)\n", rc);
+        fprintf(stderr, "Set multicast ttl failed! errno(%d)\n", errno);
         close(sockfd);
         return rc;
     }
     rc = mcast_set_loop(sockfd, grp_addr.ss_family, 0);
     if (rc != 0){
-        fprintf(stderr, "Set multicast loopback failed! rc(%d)\n", rc);
+        fprintf(stderr, "Set multicast loopback failed! errno(%d)\n", errno);
         close(sockfd);
         return rc;
     }
@@ -145,15 +150,16 @@ int main(int argc, char *argv[])
         if (rc <0) 
             continue;
 
+        b[rc] = '\0';
+        printf("Recv message(%s)\n", b);
 
         memset(timeStr, 0, sizeof(timeStr));
         time(&now);
         sprintf(timeStr, "%s", ctime(&now));
 
-        printf("time str(%s) len(%lu)\n", timeStr, sizeof(timeStr));
 
         rc = sendto(sockfd, timeStr, sizeof(timeStr), 0, (struct sockaddr*)&grp_addr, sizeof(grp_addr));
-        printf("Send messg rc(%d)\n", rc);
+        printf("Send message time str(%s) len(%lu) rc(%d)\n", timeStr, sizeof(timeStr), rc);
     }  
 
     return 0;

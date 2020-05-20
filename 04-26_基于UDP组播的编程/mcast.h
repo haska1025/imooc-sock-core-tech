@@ -9,5 +9,7 @@ int mcast_leave_group(int fd, struct sockaddr *mcast_addr, struct sockaddr *loca
 int mcast_set_ttl(int fd, int family, int ttl);
 int mcast_set_loop(int fd, int family, int flag);
 
+int mcast_inet_ntop(struct sockaddr *addr, char ip[], int iplen);
+
 #endif//_MCAST_H_
 

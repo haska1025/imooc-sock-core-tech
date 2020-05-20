@@ -93,6 +93,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    printf("Send message to mcast group(%c)\n", letter);
+
     memset(timeStr, 0, sizeof(timeStr));
     rc = recvfrom(sockfd, timeStr,
             sizeof(timeStr),

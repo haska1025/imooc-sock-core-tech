@@ -68,20 +68,20 @@ int main(int argc, char *argv[])
 
     rc = mcast_join_group(sockfd, (struct sockaddr*)&grp_addr, local_ip ? (struct sockaddr*)&local_addr : NULL);
     if (rc != 0){
-        fprintf(stderr, "Join multicast group failed! errno(%d)\n", rc);
+        fprintf(stderr, "Join multicast group failed! errno(%d)\n", errno);
         close(sockfd);
         return rc;
     }
 
     rc = mcast_set_ttl(sockfd, grp_addr.ss_family, 1);
     if (rc != 0){
-        fprintf(stderr, "Set multicast ttl failed! rc(%d)\n", rc);
+        fprintf(stderr, "Set multicast ttl failed! rc(%d)\n", errno);
         close(sockfd);
         return rc;
     }
     rc = mcast_set_loop(sockfd, grp_addr.ss_family, 0);
     if (rc != 0){
-        fprintf(stderr, "Set multicast loopback failed! rc(%d)\n", rc);
+        fprintf(stderr, "Set multicast loopback failed! rc(%d)\n", errno);
         close(sockfd);
         return rc;
     }

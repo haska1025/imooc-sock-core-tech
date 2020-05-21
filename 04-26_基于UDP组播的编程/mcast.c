@@ -29,7 +29,8 @@ static int mcast_join_or_leave_group(int fd, struct sockaddr *mcast_addr, struct
 
         memcpy(&mreq6.ipv6mr_multiaddr, &(((struct sockaddr_in6 *)mcast_addr)->sin6_addr), sizeof(struct in6_addr));
         if (localaddr){
-            mreq6.ipv6mr_interface = ((struct sockaddr_in6 *)localaddr)->sin6_scope_id; // cualquier interfaz
+        //    mreq6.ipv6mr_interface = ((struct sockaddr_in6 *)localaddr)->sin6_scope_id; // cualquier interfaz
+            mreq6.ipv6mr_interface = 0;
         } else {
             mreq6.ipv6mr_interface = 0;
         }

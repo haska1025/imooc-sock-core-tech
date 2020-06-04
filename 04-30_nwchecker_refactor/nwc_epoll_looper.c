@@ -1,7 +1,8 @@
 #include <stdio.h>
-//#include <sys/epoll.h>
+#include <sys/epoll.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "nwc_epoll_looper.h"
 #include "nwc_types.h"
@@ -33,8 +34,17 @@ static int __nwc_epoll_ctl(struct nwc_epoll_looper *looper, struct epoll_entry *
     return (rc == -1)? errno:0;
 }
 
-int nwc_epoll_start(struct nwc_epoll_looper *looper)
+int nwc_epoll_init(struct nwc_epoll_looper *looper)
 {
+    looper->parent.start = nwc_epoll_start;
+    looper->parent.stop = nwc_epoll_stop;
+    return 0;
+}
+
+int nwc_epoll_start(struct nwc_looper *l)
+{
+    struct nwc_epoll_looper *looper = (struct nwc_epoll_looper*)l; 
+
     looper->epfd = epoll_create(MAX_EPOLL_WAIT_EVENTS);
     if (looper->epfd == -1){
         printf("epoll instance create failed! errno(%d)\n", errno);
@@ -46,7 +56,7 @@ int nwc_epoll_start(struct nwc_epoll_looper *looper)
 
     return 0;
 }
-int nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler *handler)
+nwc_handle_t nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler *handler)
 {
     int rc = 0;
     struct epoll_entry *entry;
@@ -68,7 +78,7 @@ int nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler
 
     return (nwc_handle_t)entry;
 }
-int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper,struct nwc_handle_t* handle)
+int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper, nwc_handle_t handle)
 {
     int rc;
     struct epoll_entry *entry = (struct epoll_entry*)handle;
@@ -80,17 +90,17 @@ int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper,struct nwc_handle_t
 
     return rc;
 }
-int nwc_epoll_register_event(struct nwc_epoll_looper *looper,struct nwc_handle_t* handle, int events)
+int nwc_epoll_register_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events)
 {
     struct epoll_entry *entry = (struct epoll_entry*)handle;
     /* save new flags */
-    entry->mask |= flags;
+    entry->mask |= events;
     return __nwc_epoll_ctl(looper, entry, EPOLL_CTL_MOD);
 }
-int nwc_epoll_cancel_event(struct nwc_epoll_looper *looper,struct nwc_handle_t* handle, int events)
+int nwc_epoll_cancel_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events)
 {
     struct epoll_entry *entry = (struct epoll_entry*)handle;
-    entry->mask &= (~flags);
+    entry->mask &= (~events);
     return __nwc_epoll_ctl(looper, entry, EPOLL_CTL_MOD);
 }
 void nwc_epoll_run(struct nwc_epoll_looper *looper)
@@ -112,7 +122,7 @@ void nwc_epoll_run(struct nwc_epoll_looper *looper)
                 continue;
             else{
                 printf("epoll_wait exit! errno(%d)\n" , errno);
-                return -1;
+                return;
             }
         }
 
@@ -132,17 +142,17 @@ void nwc_epoll_run(struct nwc_epoll_looper *looper)
 #endif
 
             if (ev_list[i].events & (EPOLLHUP | EPOLLERR|EPOLLRDHUP))
-                entry->eh->handle_input();
+                entry->eh->handle_input(entry->eh);
 
             if (entry->fd == INVALID_HANDLE)
                 continue;
             if ( ev_list[i].events & EPOLLIN)
-                entry->eh->handle_input();
+                entry->eh->handle_input(entry->eh);
 
             if (entry->fd == INVALID_HANDLE)
                 continue;
             if (ev_list[i].events & EPOLLOUT)
-                entry->eh->handle_output();
+                entry->eh->handle_output(entry->eh);
         }
 
         // Remove all removed epoll entrys
@@ -156,8 +166,6 @@ void nwc_epoll_run(struct nwc_epoll_looper *looper)
 
     // exit loop
     close(looper->epfd);
-
-    return 0;
 }
 
 int nwc_epoll_stop(struct nwc_epoll_looper *looper)

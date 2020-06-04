@@ -3,19 +3,22 @@
 
 #include "list.h"
 #include "nwc_types.h"
+#include "nwc_looper.h"
+#include "nwc_looper_base.h"
 
 struct nwc_io_handler;
 
 struct epoll_entry
 {
     int mask;
-    nwc_handle_t fd;
+    int fd;
     struct nwc_io_handler *eh;
     struct list_head remove_entry;
 };
 
 struct nwc_epoll_looper
 {
+    struct nwc_looper parent;
     int epfd;
     int exit;
 
@@ -23,12 +26,12 @@ struct nwc_epoll_looper
     struct list_head removed_epoll_entrys;
 };
 
-
-int nwc_epoll_start(struct nwc_epoll_looper *looper);
-int nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler *handler);
-int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper,struct nwc_epoll_looper * handle);
-int nwc_epoll_register_event(struct nwc_epoll_looper *looper,struct nwc_epoll_looper * handle, int events);
-int nwc_epoll_cancel_event(struct nwc_epoll_looper *looper,struct nwc_epoll_looper * handle, int events);
+int nwc_epoll_init(struct nwc_epoll_looper *looper);
+int nwc_epoll_start(struct nwc_looper *looper);
+nwc_handle_t nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler *handler);
+int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper, nwc_handle_t handle);
+int nwc_epoll_register_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events);
+int nwc_epoll_cancel_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events);
 void nwc_epoll_run(struct nwc_epoll_looper *looper);
 int nwc_epoll_stop(struct nwc_epoll_looper *looper);
 

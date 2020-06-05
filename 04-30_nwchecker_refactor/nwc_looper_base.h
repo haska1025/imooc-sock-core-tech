@@ -7,12 +7,12 @@
 struct nwc_looper
 {
     int (*start)(struct nwc_looper *looper);
-    int (*stop)(void *looper);
-    nwc_handle_t (*add_handler)(nwc_handle_t looper, struct nwc_io_handler *handler);
-    int (*remove_handler)(nwc_handle_t looper,nwc_handle_t handle);
-    int (*register_event)(nwc_handle_t looper,nwc_handle_t handle, int events);
-    int (*cancel_event)(nwc_handle_t looper,nwc_handle_t handle, int events);
-    void (*run)(nwc_handle_t looper);
+    int (*stop)(struct nwc_looper *looper);
+    nwc_handle_t (*add_handler)(struct nwc_looper *looper, struct nwc_io_handler *handler);
+    int (*remove_handler)(struct nwc_looper *looper,nwc_handle_t handle);
+    int (*register_event)(struct nwc_looper *looper,nwc_handle_t handle, int events);
+    int (*cancel_event)(struct nwc_looper *looper,nwc_handle_t handle, int events);
+    void (*run)(struct nwc_looper *looper);
 };
 
 #endif//_NWC_LOOPER_BASE_H_

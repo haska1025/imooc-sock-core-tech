@@ -28,12 +28,15 @@ struct nwc_epoll_looper
 
 int nwc_epoll_init(struct nwc_epoll_looper *looper);
 int nwc_epoll_start(struct nwc_looper *looper);
-nwc_handle_t nwc_epoll_add_handler(struct nwc_epoll_looper *looper, struct nwc_io_handler *handler);
-int nwc_epoll_remove_handler(struct nwc_epoll_looper *looper, nwc_handle_t handle);
-int nwc_epoll_register_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events);
-int nwc_epoll_cancel_event(struct nwc_epoll_looper *looper, nwc_handle_t handle, int events);
-void nwc_epoll_run(struct nwc_epoll_looper *looper);
-int nwc_epoll_stop(struct nwc_epoll_looper *looper);
+nwc_handle_t nwc_epoll_add_handler(struct nwc_looper *looper, struct nwc_io_handler *handler);
+int nwc_epoll_remove_handler(struct nwc_looper *looper, nwc_handle_t handle);
+int nwc_epoll_register_event(struct nwc_looper *looper, nwc_handle_t handle, int events);
+int nwc_epoll_cancel_event(struct nwc_looper *looper, nwc_handle_t handle, int events);
+void nwc_epoll_run(struct nwc_looper *looper);
+int nwc_epoll_stop(struct nwc_looper *looper);
+
+#define epoll_looper(looper)\
+    (struct nwc_epoll_looper *)(looper)
 
 #endif//_EPOLL_LOOPER_H_
 

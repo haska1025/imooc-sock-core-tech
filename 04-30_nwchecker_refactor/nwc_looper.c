@@ -12,7 +12,7 @@ nwc_handle_t nwc_looper_create()
 
 void nwc_looper_destroy(nwc_handle_t looper)
 {
-    struct nwc_looper *base_looper = (struct nwc_looper*)looper;
-    base_looper->stop(looper); 
+    struct nwc_looper *blooper = (struct nwc_looper*)looper;
+    blooper->stop(blooper); 
 }
 

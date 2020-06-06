@@ -43,6 +43,12 @@ int nwc_epoll_init(struct nwc_epoll_looper *looper)
     looper->parent.cancel_event = nwc_epoll_cancel_event;
     looper->parent.run = nwc_epoll_run;
 
+    looper->epfd = -1;
+    looper->exit = 1;
+    looper->timeout_interval = -1;
+
+    INIT_LIST_HEAD(&looper->removed_epoll_entrys);
+
     return 0;
 }
 

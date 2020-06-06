@@ -4,7 +4,6 @@
 #include "list.h"
 #include "nwc_types.h"
 #include "nwc_looper.h"
-#include "nwc_looper_base.h"
 
 struct nwc_io_handler;
 

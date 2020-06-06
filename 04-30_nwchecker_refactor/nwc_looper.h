@@ -2,8 +2,8 @@
 #define _NWC_LOOPER_BASE_H_
 
 #include "nwc_types.h"
-#include "nwc_io_handler.h"
 
+struct nwc_io_handler;
 struct nwc_looper
 {
     int (*start)(struct nwc_looper *looper);

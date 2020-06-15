@@ -47,7 +47,7 @@ int nwc_sock_create(int family, int socktype, int protocol, int nonblock, int re
     return fd;
 }
 
-int nwc_sock_listen(int family, int socktype, const char *host, uint8_t port)
+int nwc_sock_listen(int family, int socktype, const char *host, uint16_t port)
 {
     int rc = 0;
     int fd = -1;
@@ -93,6 +93,7 @@ int nwc_sock_listen(int family, int socktype, const char *host, uint8_t port)
                     break;
                 }
                 close(fd);
+                fd = -1;
             }
         }
         res = res->ai_next;
@@ -100,17 +101,22 @@ int nwc_sock_listen(int family, int socktype, const char *host, uint8_t port)
 
     freeaddrinfo(ressave);
 
-    if (socktype == SOCK_STREAM ){
-        if(listen(fd, 5) == -1){
-            printf("listen socket(%d) failed(%d)\n", fd, errno);
-            close(fd);
+    if (rc < 0){
+        printf("nwc_sock_listen create socket(%d) failed(%d)\n", rc , errno);
+        return rc;
+    }
+
+    if (rc >= 0 && socktype == SOCK_STREAM ){
+        if(listen(rc, 5) == -1){
+            printf("nwc_sock_listen listen socket(%d) failed(%d)\n", rc , errno);
+            close(rc);
             return -1;
         }
     }
 
     return rc;
 }
-int nwc_sock_connect(const char *peerhost, uint8_t peerport, int *fd)
+int nwc_sock_connect(int family, int socktype, const char *peerhost, uint8_t peerport, int *fd)
 {
     int rc=0;
     struct addrinfo hints, *res, *ressave;
@@ -122,8 +128,8 @@ int nwc_sock_connect(const char *peerhost, uint8_t peerport, int *fd)
     ressave = NULL;
     memset(&hints, 0, sizeof(struct addrinfo));
 
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family = family;
+    hints.ai_socktype = socktype;
 
     rc = getaddrinfo(peerhost, ports, &hints, &res);
     if (rc != 0){

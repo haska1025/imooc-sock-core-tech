@@ -6,6 +6,7 @@
 enum NWC_TCP_STATE
 {
     NTS_CLOSED = 1,
+    NTS_LISTEN,
     NTS_CONNECTING,
     NTS_ESTABLISHED
 };
@@ -17,10 +18,13 @@ struct nwc_tcp_handler
 };
 
 int nwc_tcp_handler_init(struct nwc_tcp_handler *handler);
-int nwc_tcp_handler_connect(struct nwc_tcp_handler *handler, const char *hostname, uint16_t port);
 int nwc_tcp_handler_accept(struct nwc_tcp_handler *handler, int fd);
-int nwc_tcp_handler_send(struct nwc_tcp_handler *handler, const uint8_t buffer[], uint32_t buflen);
-int nwc_tcp_handler_close(struct nwc_tcp_handler *handler);
+
+int nwc_tcp_handler_listen(struct nwc_io_handler *handler, const char *ip, uint16_t port);
+int nwc_tcp_handler_connect(struct nwc_io_handler *handler, const char *hostname, uint16_t port);
+int nwc_tcp_handler_send(struct nwc_io_handler *handler, const uint8_t buffer[], uint32_t buflen);
+int nwc_tcp_handler_recv(struct nwc_io_handler *handler, uint8_t buffer[], uint32_t buflen);
+int nwc_tcp_handler_close(struct nwc_io_handler *handler);
 void nwc_tcp_handle_input(struct nwc_io_handler *handler);
 void nwc_tcp_handle_output(struct nwc_io_handler *handler);
 

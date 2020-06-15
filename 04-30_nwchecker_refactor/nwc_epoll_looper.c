@@ -35,6 +35,8 @@ static int __nwc_epoll_ctl(struct nwc_epoll_looper *looper, struct epoll_entry *
 
 int nwc_epoll_init(struct nwc_epoll_looper *looper)
 {
+    nwc_looper_init(&looper->parent);
+
     looper->parent.start = nwc_epoll_start;
     looper->parent.stop = nwc_epoll_stop;
     looper->parent.add_handler = nwc_epoll_add_handler;
@@ -120,19 +122,20 @@ int nwc_epoll_cancel_event(struct nwc_looper *looper, nwc_handle_t handle, int e
     entry->mask &= (~events);
     return __nwc_epoll_ctl(elooper, entry, EPOLL_CTL_MOD);
 }
+
 void nwc_epoll_run(struct nwc_looper *looper)
 {
     struct epoll_event ev_list[MAX_EPOLL_WAIT_EVENTS];
     struct list_head *pos = NULL, *n = NULL;
     struct nwc_epoll_looper *elooper = epoll_looper(looper); 
 
-    printf("enter epoll loop timer_interval(%d)", elooper->timeout_interval);
+    printf("enter epoll loop timer_interval(%d)\n", elooper->timeout_interval);
     while(!elooper->exit){
         int readys = 0;
         /*
-         * Dispatch timer event.
-         * We must dispatch tiemr events firstly before the i/o events.
+         * Dispatch worker event.
          */
+        nwc_looper_dispatch_worker(looper); 
 
         readys = epoll_wait(elooper->epfd , ev_list , MAX_EPOLL_WAIT_EVENTS , elooper->timeout_interval);
         if (readys == -1){
@@ -180,10 +183,15 @@ void nwc_epoll_run(struct nwc_looper *looper)
             free(entry);
             entry = NULL;
         }
+
+        // Remove all removed epoll entrys
+        nwc_looper_delete_removed_worker(looper); 
     }
 
     // exit loop
     close(elooper->epfd);
+
+    printf("exit epoll loop exit(%d)\n", elooper->exit);
 }
 
 int nwc_epoll_stop(struct nwc_looper *looper)
@@ -193,3 +201,4 @@ int nwc_epoll_stop(struct nwc_looper *looper)
 
     return 0;
 }
+

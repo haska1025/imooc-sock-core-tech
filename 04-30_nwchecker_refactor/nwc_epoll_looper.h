@@ -34,6 +34,7 @@ int nwc_epoll_cancel_event(struct nwc_looper *looper, nwc_handle_t handle, int e
 void nwc_epoll_run(struct nwc_looper *looper);
 int nwc_epoll_stop(struct nwc_looper *looper);
 
+
 #define epoll_looper(looper)\
     (struct nwc_epoll_looper *)(looper)
 

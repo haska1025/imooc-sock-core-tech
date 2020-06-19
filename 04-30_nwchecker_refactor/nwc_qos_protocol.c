@@ -20,10 +20,21 @@ static struct nwc_package_entry *nwc_qos_get_pkg_entry(struct list_head *hdr, ui
 
 int nwc_qos_stat(struct nwc_qos_protocol *qos)
 {
+    struct list_head *pos = NULL, *n = NULL;
+    struct nwc_package_entry *pkg_entry = NULL;
     uint32_t nowms = nwc_qos_milisecs();
+
     if (qos->last_stat_ts == 0){
         qos->last_stat_ts = nowms;
         return 0;
+    }
+
+    list_for_each_safe(pos, n, &qos->sent_queue){
+        pkg_entry = list_entry(pos, struct nwc_package_entry, package_entry);
+        if ((nowms - pkg_entry->message->timestamp) > qos->rtt){
+            qos->loss_packages_per_secs++; 
+            list_del(pos);
+        }
     }
 
     if ((int)(nowms - qos->last_stat_ts) >= qos->stat_interval){
@@ -33,12 +44,14 @@ int nwc_qos_stat(struct nwc_qos_protocol *qos)
         loss_rate /= secs;
         bd = (qos->sent_bytes * 8)/secs;
 
-        printf("qos stat bandwidth(%u) rtt(%f) lossrate(%f)\n", bd, qos->rtt, loss_rate);
+        printf("qos stat bandwidth(%u) rtt(%f) jitter(%f) lossrate(%f)\n",
+                bd, qos->rtt, qos->jitter, loss_rate);
 
         qos->sent_bytes = 0;
-        qos->last_stat_ts = nowms;
         qos->loss_packages_per_secs = 0;
         qos->sent_packages_per_secs = 0;
+
+        qos->last_stat_ts = nowms;
     }
 
     return 0;
@@ -120,6 +133,7 @@ int nwc_qos_process_package(struct nwc_qos_protocol *qos, struct nwc_qos_hdr *pk
     rtt_sample -= pkg->recv_delay;
 
     qos->rtt = qos->rtt * 0.875 + rtt_sample * 0.125;
+    qos->jitter = qos->jitter * 0.875 + (rtt_sample - qos->rtt) * 0.125;
 
     // Remove from sent queue
     list_del(&entry->package_entry);

@@ -30,7 +30,7 @@ struct nwc_qos_protocol
     double rtt;
     uint32_t loss_packages_per_secs;
     uint32_t sent_packages_per_secs; 
-    int jitter;
+    double jitter;
     uint32_t recv_timestamp;
     uint32_t recv_time;
     uint32_t sent_bytes;

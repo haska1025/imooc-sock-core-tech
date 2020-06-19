@@ -56,7 +56,7 @@ void nwc_connection_init(struct nwc_connection *nwc, struct nwc_configuration *c
     // Just client send data
     if (nwc->cfg->mode == NWC_CLIENT){ 
         if (bd == 0){
-            bd = 125;// 1000Mbps / 8 = 125KBps
+            bd = 125000;// 1000Kbps / 8 = 125KBps
         }else{
             bd >>= 3; // The unit of the user-defined bandwidth is bps
         }
@@ -176,7 +176,8 @@ int nwc_connection_on_send(void *userdata)
 
             rc = nwc_io_send(nwc->handle, buffer, buflen); 
 #ifdef _DEBUG
-            printf("nwc_io_send pkg len(%u) rc(%d)\n", buflen, rc);
+            printf("nwc_io_send bd(%d) cur_bd(%d) pkg len(%u) rc(%d)\n",
+                    nwc->qos.send_bandwidth, cur_sentbytes, buflen, rc);
 #endif
 
             if (rc <= 0){
